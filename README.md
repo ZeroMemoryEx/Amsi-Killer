@@ -2,9 +2,10 @@
 
 ## Opcode Scan
 
+* we get the exact address of the jump instruction by serching for the first byte of each instruction this technique is effective even in the face of updates or modifications to the target data set.
+
 ![image](https://user-images.githubusercontent.com/60795188/221431685-60fb2012-db0f-41aa-bd7b-3a19f07c91c4.png)
 
-* we get the exact address of the jump instruction using the first byte of each instruction this technique is effective even in the face of updates or modifications to the target data set.
 
 
 # Patch
