@@ -2,7 +2,7 @@
 
 ## Opcode Scan
 
-* we get the exact address of the jump instruction by serching for the first byte of each instruction this technique is effective even in the face of updates or modifications to the target data set.
+* we get the exact address of the jump instruction by searching for the first byte of each instruction this technique is effective even in the face of updates or modifications to the target data set.
 
 * for example :
 
