@@ -41,7 +41,10 @@
 
 ## After Patch
 
+
 * we patch the first byte and change it from JE to JMP so it return directly 
+
+  ![Screenshot 2023-02-26 195848](https://user-images.githubusercontent.com/60795188/221444031-5b8c365f-cb38-4ce4-89b5-153ecc12208d.png)
 
   ![image](https://user-images.githubusercontent.com/60795188/221432418-841db688-879c-4915-8d6e-926236a3732c.png)
 
