@@ -27,4 +27,4 @@
 
 * now we execute "Invoke-Mimikatz"
 
-![Screenshot 2023-02-26 195914](https://user-images.githubusercontent.com/60795188/221432425-5c121433-33f4-4b8d-add6-63c078d5edb8.png)
+  ![Screenshot 2023-02-26 195914](https://user-images.githubusercontent.com/60795188/221432425-5c121433-33f4-4b8d-add6-63c078d5edb8.png)
