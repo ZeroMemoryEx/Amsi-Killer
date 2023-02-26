@@ -4,6 +4,25 @@
 
 * we get the exact address of the jump instruction by serching for the first byte of each instruction this technique is effective even in the face of updates or modifications to the target data set.
 
+* for example :
+
+  ` | 48:85D2 | test rdx, rdx |`
+
+  ` | 74 3F | je amsi.7FFAE957C694 |`
+
+  ` | 48 : 85C9 | test rcx, rcx |`
+
+  ` | 74 3A | je amsi.7FFAE957C694 |`
+
+  ` | 48 : 8379 08 00 | cmp qword ptr ds : [rcx + 8] , 0 |`
+
+  ` | 74 33 | je amsi.7FFAE957C694 |`
+
+* the search pattern will be like this :
+
+  `{ 0x48,'?','?', 0x74,'?',0x48,'?' ,'?' ,0x74,'?' ,0x48,'?' ,'?' ,'?' ,'?',0x74,0x33}`
+
+  
   ![image](https://user-images.githubusercontent.com/60795188/221431685-60fb2012-db0f-41aa-bd7b-3a19f07c91c4.png)
 
 
