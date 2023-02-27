@@ -47,8 +47,7 @@ searchPattern(
 	BYTE* startAddress, 
 	DWORD searchSize, 
 	BYTE* pattern, 
-	DWORD patternSize, 
-	unsigned long long int AmsiAddr)
+	DWORD patternSize)
 {
 	DWORD i = 0;
 
