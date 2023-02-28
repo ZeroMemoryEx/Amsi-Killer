@@ -31,9 +31,6 @@ GetPID(
 				Process32Next(hSnap, &pE);
 			do
 			{
-				/*wchar_t wtext[260];
-				mbstowcs_s(wtext, pE.szExeFile, strlen(pE.szExeFile) + 1);
-				LPCWSTR ptr = wtext;*/
 				size_t size = strlen(pE.szExeFile) + 1;
 				wchar_t* targetProcessName = new wchar_t[size];
 				size_t outSize;
