@@ -59,7 +59,7 @@ searchPattern(
 				j++;
 			}
 			if (j == patternSize) {
-				printf("offset : %d\n ", i + 3);
+				printf("offset : %d\n", i + 3);
 				return (i + 3);
 			}
 		}
