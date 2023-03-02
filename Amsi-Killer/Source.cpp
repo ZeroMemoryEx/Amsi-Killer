@@ -78,6 +78,8 @@ wmain() {
 
 	if (!tpid)
 		return (-1);
+		
+	printf("Process PID %d\n", tpid);
 
 	HANDLE ProcessHandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, 0, tpid);
 
